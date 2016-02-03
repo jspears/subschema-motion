@@ -339,6 +339,36 @@ label[for='toggle-all'] {
     content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#bddad5" stroke-width="3"/><path fill="#5dc2af" d="M72 25L42 71 27 56l-4 4 20 20 34-52z"/></svg>');
 }
 
+.todo-add-btn:after {
+    position: absolute;
+    right: 10px;
+    top: 25px;
+    content: '\D7';
+    transform: rotate(45deg);
+    font-size: 20px;
+    visibility: visible;
+
+    font-weight: 600;
+}
+.todo-add-btn:hover {
+    color:#bddad5;
+}
+.todo-add-btn {
+    color: #e6e6e6;
+    height: 0;
+    width: 0;
+    display: inline-block;
+    line-height: 0;
+    box-sizing: border-box;
+    vertical-align: top;
+    padding: 0;
+    font-size: 0;
+    outline: none;
+    margin: 0;
+    position: absolute;
+    right: 0;
+    top: 10px;
+}
 .todo-list li label {
     white-space: pre;
     word-break: break-word;

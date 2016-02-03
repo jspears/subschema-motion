@@ -17,11 +17,10 @@ export default class CollectionCreateTemplate extends Component {
 
     render() {
 
-        return (  <header className="header">
+        return (  <header className="header" >
             <h1>todos</h1>
             {this.props.children}
             <input className="toggle-all" type="checkbox" style={{top:'25px'}} onChange={this.handleChange}/>
-
         </header>);
     }
 };

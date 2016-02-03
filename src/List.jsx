@@ -2,6 +2,7 @@
 import React from 'react';
 import {types, tutils} from 'subschema';
 import {TransitionMotion, spring, presets} from 'react-motion';
+import syncWrapped from './syncWrapped';
 const {path} = tutils;
 
 export default class MotionList extends types.List {
@@ -12,6 +13,15 @@ export default class MotionList extends types.List {
 
         state.value = state.value || '';
         state.selected = state.selected || 'all';
+
+    }
+
+    wrapValue(value) {
+        value = value || [];
+        if (this.state && this.state.wrapped) {
+            return syncWrapped(this.state.wrapped, value);
+        }
+        return super.wrapValue(value);
 
     }
 
@@ -70,7 +80,7 @@ export default class MotionList extends types.List {
     renderRowEachMotion = ({key, style, data}, i) => {
 
         const ItemTemplate = this.props.itemTemplate, ContentItemTemplate = this.props.contentTemplate;
-        const value = {value:data,key};
+        const value = {value: data, key};
         return <ItemTemplate style={style} key={key} pos={i} path={ path(this.props.path, i)}
                              onMoveUp={this.handleMoveUp}
                              onMoveDown={this.handleMoveDown}

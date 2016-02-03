@@ -21,7 +21,7 @@ export default class ContentItemTemplate extends Component {
         }
     };
     //(pos, val, pid)
-    handleClick = (e)=> {
+    handleSelect = (e)=> {
         e && e.preventDefault();
         //       this.props.onClick(this.props.pos, this.props.value.value, this.props.pid);
     };
@@ -34,14 +34,14 @@ export default class ContentItemTemplate extends Component {
      </li>*/
 
     render() {
-        var {value,showKey, children, labelKey} = this.props;
-        var key = value.key || '';
-        var label = labelKey ? _get(value.value, labelKey, '') : value.value;
+        const {value,showKey, children, labelKey} = this.props;
+        const key = value.key || '';
+        const label = labelKey ? _get(value.value, labelKey, '') : value.value;
+        const {isDone} = value.value;
         return (
             <div className="view">
-                <input className="toggle" type="checkbox"/>
-                <label onClick={this.handleClick}>
-                    {label }</label>
+                <input className="toggle" type="checkbox" onChange={this.handleSelect} checked={isDone}/>
+                <label> {label}</label>
                 {children}
             </div>
         );

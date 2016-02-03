@@ -29,7 +29,10 @@ var schema = {
                     }
                 }
             },
-            buttons: []
+            buttons: {
+                buttonsClass: ' ',
+                buttons: [{label: 'Add', action: 'submit', className:'todo-add-btn'}]
+            }
         }
     },
     "fieldsets": [

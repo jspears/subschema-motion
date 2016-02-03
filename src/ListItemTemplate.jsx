@@ -18,7 +18,7 @@ export default class ListItemTemplate extends Component {
         onValueChange: noop,
         onEdit: noop,
         last: false,
-        style:{}
+        style: {}
     };
 
     handleMoveUp = (e)=> {
@@ -37,9 +37,8 @@ export default class ListItemTemplate extends Component {
     };
 
     handleComplete(e) {
-        e.preventDefault();
         const {path, value} = this.props;
-        this.context.valueManager.update(path + '.isDone',  !value.value.isDone);
+        this.context.valueManager.update(path + '.isDone', !value.value.isDone);
     };
 
 
@@ -48,8 +47,9 @@ export default class ListItemTemplate extends Component {
         const {isDone} = value.value;
         return <li className={isDone ? 'completed' : ''} style={style}>
             <div className="view">
-                <input className="toggle" type="checkbox" onChange={::this.handleComplete} checked={isDone}/>
-                <label>{value.value.text}</label>
+                <input className="toggle" type="checkbox" onChange={::this.handleComplete} checked={isDone}
+                       value={isDone+''} id={path+'.isDone'} name={path+'.isDone'}/>
+                <label htmlFor={path+'.isDone'}>{value.value.text}</label>
             </div>
             <Button key="buttons" onClick={::this.handleDelete} className="destroy" value="" label=""/>
         </li>
