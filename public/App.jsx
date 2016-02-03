@@ -2,9 +2,20 @@
 import React, {Component} from "react";
 import Subschema,{Form, loader, valueManager, loaderFactory} from "Subschema";
 import subschemaMotion from '../src';
+import CollectionCreateTemplate from './CollectionCreateTemplate.jsx';
+import ListItemTemplate from './ListItemTemplate.jsx';
+import Filter from './Filter.jsx';
+import DemoLess from './Demo.css';
 import Demo from './Demo.jsx';
 
 loader.addLoader(subschemaMotion);
+
+loader.addType({Filter});
+
+loader.addTemplate({
+    CollectionCreateTemplate,
+    ListItemTemplate
+});
 
 var schema = {
     "schema": {
@@ -12,9 +23,9 @@ var schema = {
             "type": "Filter",
             title: false,
             canAdd: true,
-            canReorder: false,
+            canReorder: true,
             canDelete: true,
-            canEdit: false,
+            canEdit: true,
             showAdd: true,
             labelKey: "text",
             listContainerClassName: "todo-list",
@@ -32,7 +43,7 @@ var schema = {
             buttons: {
                 buttonsClass: ' ',
                 buttons: [
-                    {label: 'Add', action: 'submit', className:'ico-btn todo-add-btn'}
+                    {label: 'Add', action: 'submit', className: 'ico-btn todo-add-btn'}
                 ]
             }
         }
@@ -97,10 +108,8 @@ var value = {
 export default class App extends Component {
     render() {
         return <div>
-            <h3>subschema-motion</h3>
-            <p>React Motion for subschema.</p>
 
             <Form schema={schema} value={value}/>
-        </div>
+            </div>
     }
 }

@@ -1,121 +1,117 @@
 "use strict";
 import React from 'react';
-import {types, tutils} from 'subschema';
+import {types, tutils, PropTypes} from 'subschema';
 import {TransitionMotion, spring, presets} from 'react-motion';
 import syncWrapped from './syncWrapped';
+import defaults from 'lodash/object/defaults';
 const {path} = tutils;
+
 
 export default class MotionList extends types.List {
 
+    static propTypes = defaults({
+        transitionItemTo: PropTypes.func,
+        transitionItemFrom: PropTypes.func,
+        transitionItemEnter: PropTypes.func,
+        transitionItemLeave: PropTypes.func
+    }, types.List.propTypes);
+
+    static defaultProps = defaults({
+        transitionItemTo(){
+            return {
+                height: spring(60, presets.gentle),
+                opacity: spring(1, presets.gentle)
+            };
+        },
+        transitionItemFrom(){
+            return {
+                height: 0,
+                opacity: 0.01
+            };
+        },
+        transitionItemEnter(){
+            return {
+                height: 0,
+                opacity: 1
+            }
+        },
+        transitionItemLeave() {
+            return {
+                height: spring(0),
+                opacity: spring(0.01)
+            }
+        }
+    }, types.List.defaultProps);
+
     constructor(prop, ...rest) {
         super(prop, ...rest);
-        var state = this.state || (this.state = {});
-
-        state.value = state.value || '';
-        state.selected = state.selected || 'all';
-
     }
 
-    wrapValue(value) {
-        value = value || [];
-        if (this.state && this.state.wrapped) {
-            return syncWrapped(this.state.wrapped, value);
-        }
-        return super.wrapValue(value);
-
+    wrapValues(value) {
+        return syncWrapped(this.state.wrapped, value);
     }
 
-    getDefaultStyles = ()=> {
-        const defStyles = this.state.wrapped.map(({key, value, ...todo}) => ({
-            ...todo,
+
+    transitionItemFrom({id, pid, value}) {
+        return {
+            pid,
             data: value,
-            key: '' + key,
-            style: {height: 0, opacity: 1}
-        }));
-        return defStyles;
+            key: id,
+            style: this.transitionItemFrom()
+        }
     };
 
-    getStyles = ()=> {
-        const {wrapped, value, selected} = this.state;
-        return wrapped.filter(({value: {isDone, text}}) => {
-                return text.toUpperCase().indexOf(value.toUpperCase()) >= 0 &&
-                    (selected === 'completed' && isDone ||
-                    selected === 'active' && !isDone ||
-                    selected === 'all');
-            })
-            .map(({value,key,...todo}, i) => {
-                return {
-                    ...todo,
-                    key: '' + key,
-                    data: value,
-                    style: {
-                        height: spring(60, presets.gentle),
-                        opacity: spring(1, presets.gentle),
-                    }
-                };
-            });
-    };
-
-    willEnter = ()=> {
+    transitionItemTo({id, pid, value}) {
         return {
-            height: 0,
-            opacity: 1
+            data: value,
+            pid,
+            key: id,
+            style: this.transitionItemTo()
         };
+    }
+
+    getDefaultStyles = () => {
+        return this.state.wrapped.map(this.transitionItemFrom, this.props);
     };
 
-    willLeave = ()=> {
-        return {
-            height: spring(0),
-            opacity: spring(0)
-        };
+    getStyles = () => {
+        return this.state.wrapped.map(this.transitionItemTo, this.props);
     };
 
-    /*
-     (<div className={className}>
-     {this.renderAdd()}
-     <ul className={listClassName}>
-     {values.map(this.renderRowEach, this)}
-     </ul>
-     </div>);*/
-    renderRowEachMotion = ({key, style, data}, i) => {
+    renderRowEachMotion = ({pid, key, style, data}, i) => {
 
         const ItemTemplate = this.props.itemTemplate, ContentItemTemplate = this.props.contentTemplate;
-        const value = {value: data, key};
-        return <ItemTemplate style={style} key={key} pos={i} path={ path(this.props.path, i)}
-                             onMoveUp={this.handleMoveUp}
-                             onMoveDown={this.handleMoveDown}
-                             onDelete={this.handleDelete}
-                             onEdit={this.handleEdit}
-                             canReorder={this.props.canReorder}
-                             canDelete={this.props.canDelete}
-                             canEdit={this.props.canEdit}
-                             field={value}
-                             pid={key}
-                             value={value} errors={this.props.errors} last={i + 1 === this.state.wrapped.length}>
+        const value = {value: data, key: pid};
+        return (<ItemTemplate style={style} key={key} pos={i} path={ path(this.props.path, i)}
+                              onMoveUp={this.handleMoveUp}
+                              onMoveDown={this.handleMoveDown}
+                              onDelete={this.handleDelete}
+                              onEdit={this.handleEdit}
+                              canReorder={this.props.canReorder}
+                              canDelete={this.props.canDelete}
+                              canEdit={this.props.canEdit}
+                              pid={pid}
+                              value={value} errors={this.props.errors} last={i + 1 === this.state.wrapped.length}>
             {this.props.inline && this.state.editPid === v.key ? this.renderAddEditTemplate(v, false) :
                 <ContentItemTemplate labelKey={this.props.labelKey}
                                      pos={i}
-                                     pid={key}
+                                     pid={pid}
                                      value={value}
                                      showKey={this.props.showKey}
                                      onClick={this.props.canEdit ? this.handleEdit : null}/> }
-        </ItemTemplate>
+        </ItemTemplate>);
     };
 
     render() {
-
-        const {wrapped, value, selected} = this.state;
-        //  const itemsLeft = wrapped.filter(({data: {isDone}}) => !isDone).length;
-        var {name,  itemType, errors,className, listClassName, canReorder, canDelete, itemTemplate, canEdit, canAdd } = this.props, values = this.state.wrapped || EMPTY_ARR, length = values.length;
-        return (<div className={className}>
+        return (<div className={this.props.className}>
             {this.renderAdd()}
             <TransitionMotion
                 defaultStyles={this.getDefaultStyles()}
                 styles={this.getStyles()}
-                willLeave={this.willLeave}
-                willEnter={this.willEnter}>
+                willLeave={this.props.transitionItemLeave}
+                willEnter={this.props.transitionItemEnter}>
                 {styles =>
-                    <ul className="todo-list">
+                    <ul className={this.props.listContainerClassName}>
                         {styles.map(this.renderRowEachMotion)}
                     </ul>
                 }

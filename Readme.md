@@ -2,6 +2,9 @@ subschema-motion
 ===
 React Motion for subschema.
 
+The purpose of this module is show how motion and complex behaviour can
+be added in a declarative manner.
+
 ##Demo
 See it in action [here](http://subschema.github.io/subschema-motion)
 

@@ -1,11 +1,16 @@
 "use strict";
 
+let MAX_ID = 0;
+
 function findMatchValue(values, value) {
     for (let i = 0, l = values.length; i < l; i++) {
         if (values[i].value === value) {
             return values[i];
         }
     }
+    return;
+}
+function noop() {
     return;
 }
 /**
@@ -16,18 +21,39 @@ function findMatchValue(values, value) {
  */
 export default function wrapValue(wrapped, values) {
     values = values || [];
+    wrapped = wrapped || [];
     const length = values.length;
     const copy = new Array(length);
+    const match = wrapped && wrapped.length ? findMatchValue : noop;
+
     //should create a unique key for new elements.
-    let key = Math.max(wrapped.length, values.length);
+    let hasChange = wrapped.length !== values.length;
     for (let i = 0; i < length; i++) {
         const value = values[i];
-        const exists = findMatchValue(wrapped, value);
+        //if it hasn't changed, than we don't need to do anything.
+        if (!hasChange && wrapped[i] && wrapped[i].value === value) {
+            wrapped[i].pid = i;
+            wrapped[i].id = wrapped[i].id || '' + (MAX_ID++);
+            continue;
+        }
+        if (hasChange === false && i > 0 ){
+            //reset the loop.
+            i=-1;
+            hasChange = true;
+            continue;
+        }
+        hasChange = true;
+        const exists = match(wrapped, value);
         if (exists !== void(0)) {
             copy[i] = exists;
+            if (!exists.pid) {
+                exists.pid = i;
+                hasChange = true;
+            }
         } else {
-            copy[i] = {value, key: key++};
+
+            copy[i] = {value, pid: i, key: i, id: '' + (MAX_ID++)};
         }
     }
-    return copy;
+    return hasChange ? copy : wrapped;
 }
