@@ -9,7 +9,7 @@ loader.addLoader(subschemaMotion);
 var schema = {
     "schema": {
         "todos": {
-            "type": "List",
+            "type": "Filter",
             title: false,
             canAdd: true,
             canReorder: false,
@@ -31,7 +31,9 @@ var schema = {
             },
             buttons: {
                 buttonsClass: ' ',
-                buttons: [{label: 'Add', action: 'submit', className:'todo-add-btn'}]
+                buttons: [
+                    {label: 'Add', action: 'submit', className:'ico-btn todo-add-btn'}
+                ]
             }
         }
     },

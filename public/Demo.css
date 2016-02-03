@@ -418,6 +418,14 @@ label[for='toggle-all'] {
 .todo-list li.editing:last-child {
     margin-bottom: -1px;
 }
+.todo-list li .move-up-btn:after {
+    content: '\276F';
+    transform: rotate(45deg);
+}
+.todo-list li .move-down-btn:after {
+    content: '\276F';
+    transform: rotate(-45deg);
+}
 
 .footer {
     color: #777;
