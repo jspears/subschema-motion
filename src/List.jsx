@@ -4,12 +4,28 @@ import {types, tutils, PropTypes} from 'subschema';
 import {TransitionMotion, spring, presets} from 'react-motion';
 import syncWrapped from './syncWrapped';
 import defaults from 'lodash/object/defaults';
+import hash from './hash';
 const {path} = tutils;
 
+function generate(cur) {
+    return function defaultIdGenerator(val) {
+        if (typeof val === 'string') {
+            return hash(val);
+        }
+        if ('idAttribute' in this) {
+            if (this.idAttribute in val) {
+                return val[this.idAttribute];
+            }
+            return (val[this.idAttribute] = defaultIdGenerator(`${this.idAttribute}${cur++}`));
+        }
+    };
+}
 
 export default class MotionList extends types.List {
 
     static propTypes = defaults({
+        idAttribute: PropTypes.string,
+        idGenerator: PropTypes.func,
         transitionItemTo: PropTypes.func,
         transitionItemFrom: PropTypes.func,
         transitionItemEnter: PropTypes.func,
@@ -17,25 +33,30 @@ export default class MotionList extends types.List {
     }, types.List.propTypes);
 
     static defaultProps = defaults({
-        transitionItemTo(){
+        idGenerator: generate(1),
+        idAttribute: '_id',
+        transitionItemTo() {
             return {
                 height: spring(60, presets.gentle),
                 opacity: spring(1, presets.gentle)
             };
         },
-        transitionItemFrom(){
+        transitionItemFrom()
+        {
             return {
                 height: 0,
                 opacity: 0.01
             };
         },
-        transitionItemEnter(){
+        transitionItemEnter()
+        {
             return {
                 height: 0,
                 opacity: 1
             }
         },
-        transitionItemLeave() {
+        transitionItemLeave()
+        {
             return {
                 height: spring(0),
                 opacity: spring(0.01)
@@ -43,43 +64,44 @@ export default class MotionList extends types.List {
         }
     }, types.List.defaultProps);
 
-    constructor(prop, ...rest) {
-        super(prop, ...rest);
+    constructor(props, ...rest) {
+        super(props, ...rest);
+
     }
 
     wrapValues(value) {
-        return syncWrapped(this.state.wrapped, value);
+        return syncWrapped(this.state.wrapped, value, ::this.props.idGenerator);
     }
 
 
-    transitionItemFrom({id, pid, value}) {
+    transitionItemFrom({pid, value}) {
         return {
-            pid,
             data: value,
-            key: id,
+            pid,
+            key: this.idGenerator(value),
             style: this.transitionItemFrom()
-        }
-    };
+        };
+    }
 
-    transitionItemTo({id, pid, value}) {
+    transitionItemTo({pid, value}) {
         return {
             data: value,
             pid,
-            key: id,
+            key: this.idGenerator(value),
             style: this.transitionItemTo()
         };
     }
 
-    getDefaultStyles = () => {
+    getDefaultStyles() {
         return this.state.wrapped.map(this.transitionItemFrom, this.props);
-    };
+    }
 
-    getStyles = () => {
+    getStyles() {
         return this.state.wrapped.map(this.transitionItemTo, this.props);
-    };
+    }
 
-    renderRowEachMotion = ({pid, key, style, data}, i) => {
-
+    renderRowEachMotion = ({ key, style, data}, i) => {
+        const pid = i;
         const ItemTemplate = this.props.itemTemplate, ContentItemTemplate = this.props.contentTemplate;
         const value = {value: data, key: pid};
         return (<ItemTemplate style={style} key={key} pos={i} path={ path(this.props.path, i)}
